@@ -1,7 +1,7 @@
 const chai = require("chai");
 const chaiHttp = require("chai-http");
 
-const {app, runServer, closeServer} = require("../server.");
+const {app, runServer, closeServer} = require("../server");
 
 const expect = chai.expect;
 
@@ -54,12 +54,35 @@ describe('Blog Posts', function() {
     });
 
     it("should update blog post on PUT", function() {
+        const updateData = {
+            title: 'Cheese is on the way',
+            content: 'Cheese is making the biggest comeback ever to the face care products',
+            author: 'Clint Eastwood'
+        };
         return chai
             .request(app)
+            .get("/blog-posts")
+            .then(function(res) {
+                updateData.id = res.body[0].id;
+                return chai.request(app)
+                    .put(`/blog-posts/${updateData.id}`)
+                    .send(updateData)
+            })
+            .then(function(res) {
+                expect(res).to.have.status(204);
+            });
     });
 
     it("should delete blog post on DELETE", function() {
         return chai
             .request(app)
+            .get('blog-posts')
+            .then(function(res) {
+                return chai.request(app)
+                    .delete(`/blog-posts/${res.body[0].id}`);
+            })
+            .then(function(res) {
+                expect(res).to.have.status(204);
+            });
     });
 });
