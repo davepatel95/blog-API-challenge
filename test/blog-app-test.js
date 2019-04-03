@@ -16,25 +16,29 @@ describe('Blog Posts', function() {
         return closeServer();
     });
 
+
     it("should create blog post on POST", function() {
         const newBlogPost = {
             title: "A New Day",
             content: "The New Day are the greatest tag team of all time and here is why...",
-            author: 'Kofi Kingston'
+            author: "Kofi Kingston",
+            publishDate: "September 22, 2018"
         };
         return chai
             .request(app)
-            .send("/blog-posts")
+            .post("/blog-posts")
+            .send(newBlogPost)
             .then(function(res) {
                 expect(res).to.have.status(201);
                 expect(res).to.be.json;
                 expect(res.body).to.be.a('object');
-                expect(res.body).to.include.keys('id','title','content', 'author');
+                expect(res.body).to.have.all.keys('id','title','content', 'author', 'publishDate');
                 expect(res.body.id).to.not.equal(null);
-                expect(res.body).to.deep.equal(Object.assign(newBlogPost, {id: res.body.id}));
+                expect(res.body.content).to.equal(newBlogPost.content);
+                expect(res.body.title).to.equal(newBlogPost.title);
+                expect(res.body.author).to.equal(newBlogPost.author);
             });
     });
-
     it("should return blog posts on GET", function() {
         return chai
             .request(app)
@@ -76,7 +80,7 @@ describe('Blog Posts', function() {
     it("should delete blog post on DELETE", function() {
         return chai
             .request(app)
-            .get('blog-posts')
+            .get('/blog-posts')
             .then(function(res) {
                 return chai.request(app)
                     .delete(`/blog-posts/${res.body[0].id}`);
